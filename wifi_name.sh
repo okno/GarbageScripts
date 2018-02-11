@@ -26,24 +26,19 @@ cat <<EOF
 		License :    MIT 
 EOF
 
-SORGENTE="/media/okno/"			# Cosa copiare
-TARGET="/media/veracrypt1"		# Dove copiare
-EXCLUDE=""						# Lista file da escludere
-TAG="Backup Logger" 			# tag dei log scritti in /var/log/messages
+# Controllo Nome Rete Wifi Attiva # conky 1.9.0+ Compatibile
+# 11/08/2013 
 
-# VERIFICA MOUNT
-MOUNTED=$(df | grep $TARGET |awk '{print $6}')
+interface=wlan0
 
-if [ "$MOUNTED" == "$TARGET" ]
-then
-	echo "Il disco è montato: eseguo il backup"
-	logger Inizio backup di $SORGENTE per `hostname` -t $TAG
-	rsync -av --exclude-from=$EXCLUDE $SORGENTE $TARGET/
-	RSYNCERR=$?
-	logger Fine backup per `hostname` rsync ha restituito $RSYNCERR -t $TAG
-	exit 0
+if [ -e ~/.rete ]; then
+/sbin/iwconfig $interface | /sbin/iwconfig $interface | grep ESSID |cut -c 31-43 > .rete
 else
-	echo "Il disco non è montato"
-	logger Impossibile eseguire il backup di `hostname` disco non montato -t $TAG
-	exit 1
+touch ~/.rete
+/sbin/iwconfig $interface | /sbin/iwconfig $interface | grep ESSID |cut -c 31-43 > .rete
+fi
+if [ "$(cat .rete)" = "" ]; then
+echo "Non collegato!"
+else 
+cat .rete |  sed 's/ID:"//'
 fi
